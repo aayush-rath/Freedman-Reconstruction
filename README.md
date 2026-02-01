@@ -1,6 +1,8 @@
 # Freedman Manifold Reconstruction from Point Cloud
+This is a manifold reconstruction algorithm for manifold learning given a point set that represents samples that lie on some manifold $ \mathcal{M} \subset \mathbb{R}^n $. This repo gives the explanation and an implementation of the paper *"Efficient Simplicial Reconstructions
+of Manifolds from Their Samples" - Daniel Freedman(2002)*
 
-## Tangent Space
+## Approximate Tangent Space
 Enclosed: A $k$-dimensional point $x$ is said to be  enclosed by $k+1$ points if the projection of x onto the k-dimensional hyperplane running through $\{x_i\}_{i=0}^k$ is contained within the k-dimensional simplex defined by $\{x_i\}_{i=0}^k$
 
 <div align="center">
@@ -46,7 +48,7 @@ $$
 \vec{\lambda} = \frac{1}{2}(\mathbf{\Omega}^T\mathbf{\Omega})^{-1}(\mathbf{\Omega}^T(\vec{x} - \vec{x}_0) + (\vec{x} - \vec{x}_0)^T\mathbf{\Omega})
 $$
 
-We define the **Approximate tangent space** for a local point set as the hyperplane containing $\{x_i\}_{i=0}^k$ shifted by $\vec{x} - \vec{x}_0$ where $\{x_i\}_{i=0}^k$ is the k neighboring points of $\vec{x}$
+We define the **Approximate tangent space** for a local point set as the hyperplane containing $\{x_i\}_{i=0}^k$ shifted by $\vec{x} - \vec{x}_0 $ where $\{x_i\}_{i=0}^k $ is the k neighboring points of $\vec{x} $
 
 ## Local Region and Edge Set
 The **perpendicular bisecting halfspace** of the point $x \in X$ with respect to the point $x' \in X$ is denoted by 
@@ -59,6 +61,7 @@ $$
 </div>
 
 The **local region** of $x \in X - BD$ i.e. defined by points that don't lie on the boundary given by
+
 $$
 LR(x) = \left[ \cap_{x' \in X} PBH(x, x') \right] \cap ATS(x)
 $$
@@ -77,6 +80,7 @@ PBH(x, x') = \{z \in Z : \langle x - x',z - \frac{1}{2}(x + x')\rangle \geq 0\}
 $$
 
 From the intersection of both, we get,
+
 $$
 \langle x - x',\Omega_x \lambda + x - \frac{1}{2}(x + x')\rangle\\
 \begin{split}
@@ -84,4 +88,11 @@ $$
 \end{split}
 $$
 
-Which essentially is the equation of a convex hull
+Which essentially is the equation of the exterior  of the convex hull. This provides the edge set $ES(x)$ that can be used to find the most binding constraints posed by the intersecting halfspaces so, instead for taking the $PBH(x,x')$ for all $x' \in X - \{x\}$ we only we use $x \in ES(x)$ i.e. points lying on the boundary of the convex hull. This gives us the local region as 
+
+$$
+LR(x) = [\cap_{x' \in ES(x)} PBH(x, x')]\cap ATS(x)
+$$
+
+## Simplicial Complex
+The simplicial complex refers to the topological structure constructed from a collection of d-simplices which is an undirected graph $G = (V, E)$. Given two vertices $x, y \in V$, an edge $e = (x, y)$ is in $E$ iff $x \in ES(y)$ and $y \in ES(x)$.

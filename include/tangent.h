@@ -18,53 +18,40 @@ points is inside the simplex formed by the K+1 points
 is called the approximating tangent basis
 */
 
-
-/*
-Progress:
--09/01/2026: Implemented ATS
-
-*/
-
-
 template<int D>
-using Vec = Point<D>;
-
-template <int D>
-class TangentBasis : public Vec{
+class TangentBasis {
 public:
-    KDTree<D> kdt;
-    std::vector<Point<D>> point_set
-    std::vector<Vec<D>> tangent_basis;
+    using Vec = Point<D>;
 
-    TangentBasis(const std::vector<Point<D>>& point_set, const KDTree& kdt) : point_set(point_set), kdt(kdt) {
-        computeTB();
+    std::vector<std::array<Vec, D>> bases;
+
+    TangentBasis(
+        const std::vector<Vec>& points,
+        const KDTree<D>& kdt
+    ) {
+        compute(points, kdt);
     }
+
 private:
+    void compute(const std::vector<Vec>& points,
+                 const KDTree<D>& kdt)
+    {
+        int N = points.size();
+        bases.resize(N);
+        for (int i = 0; i < N; ++i) {
+            std::vector<int> nn;
+            kdt.knnSearch(points[i], D + 1, nn);
 
-    void computeTB() {
-        int num_points = point_set.size();
-        for (int i  = 0; i < num_points; i++) {
-            std::vector<int> neighbors;
-            kdt.knnSearch(point_set[i], D+1, neighbors);
-            Point<D> x0 = point_set[neighbors[0]];
+            Eigen::MatrixXd V(D, D);
+            for (int j = 1; j <= D; ++j)
+                V.row(j-1) = (points[nn[j]] - points[nn[0]]).eigen();
 
-            Eigen::MatrixXf Phi(D, D);
-            for (int j = 1; j <= D; j++) {
-                for (int k = 1; k <= D; k++) {
-                    Phi(j-1, k-1) = dot(point_set[neighbors[j]] - x0, point_set[neighbors[k]] - x0);
-                }
-            }
+            Eigen::JacobiSVD<Eigen::MatrixXd> svd(
+                V, Eigen::ComputeThinV
+            );
 
-            Eigen::VectorXf phi(D);
-            for (int j = 1; j <= D; j++) {
-                phi(j-1) = 0.5(dot(point_set[neighbors[j]] - x0, point_set[i] - x0) + dot(point_set[i] - x0, point_set[neighbors[j]] - x0));
-            }
-
-            Eigen::VectorXf lambda_star = Phi.inverse() * phi;
-            for (int j = 0; j < D; j++) {
-                tangent_basis[i][j] = lambda_star(j);
-            }
+            for (int k = 0; k < D; ++k)
+                bases[i][k] = Vec(svd.matrixV().col(k));
         }
     }
 };
-
