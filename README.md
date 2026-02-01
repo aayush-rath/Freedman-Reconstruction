@@ -71,11 +71,12 @@ $$
 </div>
 
 We can write the $ATS(x)$ and $PBH(x)$ as
+
 $$
 ATS(x) = \{z \in Z: z = \Omega_x \lambda + x, \lambda \in \mathbb{R}^k\}
 $$
 
-$$= 
+$$
 PBH(x, x') = \{z \in Z : \langle x - x',z - \frac{1}{2}(x + x')\rangle \geq 0\}
 $$
 
