@@ -25,6 +25,7 @@ public:
 
     std::vector<std::array<Vec, D>> bases;
 
+
     TangentBasis(
         const std::vector<Vec>& points,
         const KDTree<D>& kdt
